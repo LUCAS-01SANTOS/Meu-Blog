@@ -7,13 +7,16 @@ website:
   description: "Blog pessoal"
   navbar:
     right:
-      - about.qmd
+      - href: about.qmd
+        text: Sobre
+      - icon: linkedin
+        href: https://www.linkedin.com/in/lucas-souza-santos-709453165/
       - icon: github
-        href: https://github.com/
-      - icon: twitter
-        href: https://twitter.com
+        href: https://github.com/LUCAS-01SANTOS
       - icon: rss
         href: index.xml
+execute:
+  freeze: auto
 format:
   html:
     theme: lux
