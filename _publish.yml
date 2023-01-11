@@ -1,0 +1,4 @@
+- source: project
+  netlify:
+    - id: 1bdbde3b-1e8e-4321-8d2b-795065f963de
+      url: 'https://lucas-s-santos.netlify.app/'
