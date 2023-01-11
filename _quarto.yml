@@ -15,12 +15,26 @@ website:
         href: https://github.com/LUCAS-01SANTOS
       - icon: rss
         href: index.xml
+    foreground: secondary
+    background: primary
+  sidebar:
+    style: "floating"
+    search: true
+    contents: auto
+  page-footer:
+    border: false
+    left: "Copyright 2023, Lucas Souza Santos" 
+    right:
+      - icon: linkedin
+        href: https://www.linkedin.com/in/lucas-souza-santos-709453165/
+      - icon: github
+        href: https://github.com/LUCAS-01SANTOS
+  reader-mode: true
 execute:
   freeze: auto
 format:
   html:
     theme: lux
     css: styles.css
-
 
 
