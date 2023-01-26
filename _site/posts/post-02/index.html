@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.313">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Lucas Souza Santos">
+<meta name="dcterms.date" content="2023-01-25">
+
+<title>Lucas Souza Santos - Análise de Retornos Financeiros de Ações e Ibovespa com Python</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../favicon-site.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark.min.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed fullcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Lucas Souza Santos</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link active" href="../../about.html" aria-current="page">
+ <span class="menu-text">Sobre</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.linkedin.com/in/lucas-souza-santos-709453165/"><i class="bi bi-linkedin" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/LUCAS-01SANTOS"><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="../../index.xml"><i class="bi bi-rss" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+              <div class="quarto-toggle-container">
+                  <a href="" class="quarto-color-scheme-toggle nav-link" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+              </div>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+    <div class="container-fluid d-flex justify-content-between">
+      <h1 class="quarto-secondary-nav-title">Análise de Retornos Financeiros de Ações e Ibovespa com Python</h1>
+      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title d-none d-lg-block">Análise de Retornos Financeiros de Ações e Ibovespa com Python</h1>
+                                <div class="quarto-categories">
+                <div class="quarto-category">python</div>
+                <div class="quarto-category">finanças</div>
+                <div class="quarto-category">bolsa de valores</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Lucas Souza Santos </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">January 25, 2023</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+      <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../about.html" class="sidebar-item-text sidebar-link">Sobre</a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">Posts</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../posts/post-02/index.html" class="sidebar-item-text sidebar-link active">Análise de Retornos Financeiros de Ações e Ibovespa com Python</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../posts/post-01/index.html" class="sidebar-item-text sidebar-link">Meu Primeiro Post Blog</a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<section id="introdução" class="level2">
+<h2 class="anchored" data-anchor-id="introdução">Introdução</h2>
+<p>A análise de retornos financeiros é um dos principais meios de avaliar os resultados de investimentos em ações. Neste artigo, vamos aprender como calcular e analisar os retornos financeiros de ações e do índice Bovespa (IBOV) usando Python.</p>
+<p>No post de hoje, vamos realizar uma análise exploratória da série de retornos diários do Ibovespa utilizando o Python.</p>
+</section>
+<section id="metodologia" class="level2">
+<h2 class="anchored" data-anchor-id="metodologia">1. Metodologia</h2>
+<p>Um site popular que fornece preços diários de ações é o Yahoo! Finance. No entanto, se você usar os preços cotados neste site para calcular o retorno de uma ação, deverá ter o cuidado de usar as informações corretas. O Yahoo! Finance informa dois preços de fechamento de ações, o preço de fechamento real e o fechamento ajustado (Adj Close) <em>que é ajustado para desdobramentos de ações e dividendos</em>.</p>
+<p>Em um <strong>desdobramento de ações (os Splits)</strong>, o número de ações aumenta e o preço das ações diminui. Por exemplo, em um desdobramento de ações 2 por 1, o número de ações seria dobrado, pois os acionistas receberiam 2 ações para cada 1 ação que possuem atualmente, e o preço das ações seria reduzido pela metade.</p>
+<p>Suponha que uma ação esteja sendo negociada atualmente a $ 120 por ação e passe por um desdobramento de 2 para 1. Suponha também que o preço das ações permaneça inalterado durante o dia. O preço de fechamento no Yahoo! O setor financeiro reportaria <strong>preços de $ 120 e $ 60, respectivamente</strong>, o que parece uma queda de 50% no preço das ações. Na verdade, o retorno do acionista durante o dia foi zero porque, embora o preço das ações tenha caído pela metade, o número de ações que possuíam dobrou. <strong>Nesse caso, o preço de fechamento ajustado seria de US$ 60 para os dois dias.</strong></p>
+<p>O fechamento ajustado relatado no Yahoo! O setor financeiro também ajusta os dividendos. Considere uma ação que está sendo vendida por $ 100 no final de abril, paga um dividendo de $ 5 e tem um preço de $ 108 no final de maio. O retorno do acionista para esse período foi (US$ 108 - US$ 100 + 5) / US$ 100 = 13%. Nesse caso, o fechamento ajustado no final de maio seria de US$ 108, enquanto o fechamento ajustado do final de abril seria de US$ 95,581, o que representa um retorno de (US$ 108 - 95,581) / US$ 95,581 = 13%.</p>
+<p>É importante também frisar que <strong>os preços ajustados do Yahoo! não são exatos</strong>, pois o Yahoo! Finance relata o <em>ajuste próximo ao centavo mais próximo</em>. Esse arredondamento pode causar uma pequena diferença no cálculo do retorno. Considere o exemplo que usamos acima. Usando o preço ajustado de US$ 95,581, calcule você mesmo que o retorno é, na verdade, 12,99%, não 13%. <strong>Se você precisar de retornos totais, o fechamento ajustado fornecerá um cálculo de retorno bastante preciso e muito mais fácil</strong>, especialmente porque o Yahoo! finance não vai baixar preços e dividendos na mesma planilha. <em>No entanto, se você precisar de retornos de ganhos de capital e rendimentos de dividendos separadamente, ou retornos muito precisos, precisará usar o preço de fechamento e os dividendos, não o fechamento ajustado.</em></p>
+</section>
+<section id="preparando-o-ambiente" class="level2">
+<h2 class="anchored" data-anchor-id="preparando-o-ambiente">2. Preparando o ambiente</h2>
+<blockquote class="blockquote">
+<p>Todo o código foi executado utilizando o <strong><a href="https://colab.research.google.com/">Google Colab</a></strong>. (Gratuito e Online) Caso for executar localmente em sua máquina certifique-se de instalar todas as bibliotecas antes de importa-las.</p>
+</blockquote>
+<p>Instalação das bibliotecas necessárias:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>pip install <span class="op">-</span>q yfinance</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>pip install <span class="op">-</span>q quantstats</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Importação das bibliotecas utilizadas:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> yfinance <span class="im">as</span> yf</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> quantstats <span class="im">as</span> qs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="retornos-mensais-do-índice-bovespa" class="level2">
+<h2 class="anchored" data-anchor-id="retornos-mensais-do-índice-bovespa">3. Retornos mensais do Índice Bovespa</h2>
+<p>Primeiro, importamos os dados e criamos um DataFrame usando o Pandas. Em seguida, criamos um novo DataFrame com os retornos financeiros calculados.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>ticker_ibov <span class="op">=</span> [<span class="st">'^BVSP'</span>]</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>periodo_ibov <span class="op">=</span> <span class="st">'10y'</span>  <span class="co"># Opções: 1d,5d,1mo,3mo,6mo,1y,2y,5y,10y,ytd,max</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Inicialmente criamos a variável <code>ticker_ibov</code>, onde salvaremos o ticker do índice Bovespa. E a variável <code>periodo_ibov</code>, onde salvamos o período ou intervalo de tempo para coleta dos dados.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>ibov <span class="op">=</span> yf.download(ticker_ibov, period<span class="op">=</span>periodo_ibov, rounding<span class="op">=</span><span class="va">True</span> )[<span class="st">'Adj Close'</span>]</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>retornos_ibov <span class="op">=</span> ibov.resample(<span class="st">'M'</span>).last().pct_change().dropna()</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>qs.extend_pandas()</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>retornos_ibov.plot_monthly_heatmap()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Em seguida, salvamos na variável <code>ibov</code> o conjunto de dados de Preços Ajustados (Adj Close).</p>
+<p>Com a função <code>resample()</code> do Pandas, que é um método de conveniência para conversão de frequência e reamostragem de séries temporais. Agruparemos os dados mês a mês. Usamos o <code>pct_change()</code> para obtermos o aumento percentual e o <code>dropna()</code> para limparmos as linhas as quais não possuem preço de fechamento. O dataframe tratado é salvo na variável <code>retornos-ibov</code>.</p>
+<p><strong>O cálculo:</strong> Para o <strong>retorno total utilizando o fechamento ajustado</strong> é bem simples, como segue,</p>
+<p><img src="formula-retorno.png" class="img-fluid"></p>
+<p><em>Retorno Total = (Preço Final-Preço Inicial)/Preço Inicial</em></p>
+<p>ou</p>
+<p><em>Retorno Total = Preço Final/Preço Inicial-1</em></p>
+<p>E é exatamente esse calculo que é feito com a função <code>pct_change()</code>. Por fim, plotamos o nosso gráfico.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="RM-ibov.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Mapa de calor dos retornos mensais do Ibovespa nos últimos 10 anos, desde 2013. Fonte: Yahoo! Finance. Elaboração: Lucas Souza Santos.</figcaption><p></p>
+</figure>
+</div>
+<p>Podemos identificar com o mapa acima que, o meses de março de 2016 e novembro de 2020 obtiveram os maiores retornos percentuais, já março de 2020 foi o mês com a maior baixa do índice, justificado pelo decreto da pandemia de Covid-19. O índice tem iniciado o mês de janeiro de 2023 no positivo, até o momento em que os dados foram coletados.</p>
+</section>
+<section id="análise-dos-retornos-do-bando-do-brasil" class="level2">
+<h2 class="anchored" data-anchor-id="análise-dos-retornos-do-bando-do-brasil">4. Análise dos retornos do Bando do Brasil</h2>
+<section id="obtenção-dos-dados" class="level3">
+<h3 class="anchored" data-anchor-id="obtenção-dos-dados"><strong>Obtenção dos Dados</strong></h3>
+<p>Aqui, repetimos o mesmo processo executado anteriormente com os dados do Ibovespa.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>tickers <span class="op">=</span> [<span class="st">'BBAS3.SA'</span>,]</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>periodo <span class="op">=</span> <span class="st">'10y'</span>  <span class="co"># Opções: 1d,5d,1mo,3mo,6mo,1y,2y,5y,10y,ytd,max</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>prices <span class="op">=</span> yf.download(tickers, period<span class="op">=</span>periodo, rounding<span class="op">=</span><span class="va">True</span> )[[<span class="st">'Adj Close'</span>, <span class="st">'Volume'</span>]]</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>prices</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="preços" class="level3">
+<h3 class="anchored" data-anchor-id="preços">Preços</h3>
+<p>Ao executarmos a variável prices, notaremos que ela contém o seguinte DataFrame, o que já nos permite ter uma primeira visualização dos nossos dados. Aqui além dos preços, também temos a coluna com o volume.</p>
+<p><img src="dataframe.png" style="width: 300px"></p>
+<p>Plotagem da série temporal de <code>prices</code>:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>prices[<span class="st">'Adj Close'</span>].plot(kind <span class="op">=</span> <span class="st">'line'</span>, title<span class="op">=</span><span class="st">'Preços Ajustados'</span>, xlabel<span class="op">=</span><span class="st">'Data'</span>, ylabel<span class="op">=</span><span class="st">'Preços'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="adj-close-BB.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Gráfico dos preços ajustados da BBAS3, últimos 10 anos. Fonte: Yahoo! Finance. Elaboração: Lucas Souza Santos.</figcaption><p></p>
+</figure>
+</div>
+<p>Podemos observar que os preço das ações do Banco do Brasil (BBAS3) tiveram um movimento de alta expressiva ao longo de 2019, seguida de uma queda também expressiva no início de 2020.</p>
+</section>
+<section id="retornos-anuais" class="level3">
+<h3 class="anchored" data-anchor-id="retornos-anuais">Retornos Anuais</h3>
+<div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>retornos_anuais <span class="op">=</span> prices[<span class="st">'Adj Close'</span>].resample(<span class="st">'Y'</span>).last().pct_change().dropna()</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>retornos_anuais.index <span class="op">=</span> retornos_anuais.index.year</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>retornos_anuais.plot(kind <span class="op">=</span> <span class="st">'barh'</span>, title<span class="op">=</span><span class="st">'Retornos Anuais'</span>, xlabel<span class="op">=</span><span class="st">'Data'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="retornos-anuais.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Retornos anuais BBAS3. Fonte: Yahoo! Finance. Elaboração: Lucas Souza Santos.</figcaption><p></p>
+</figure>
+</div>
+<p>Os anos em que houveram retornos negativos foram 2015, 2020, 2021. Sendo 2015 o ano com <strong>maior retorno negativo</strong> e 2016 o ano com <strong>maior retorno positivo</strong>.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>fig, (ax1, ax2) <span class="op">=</span> plt.subplots(nrows<span class="op">=</span><span class="dv">2</span>, ncols<span class="op">=</span><span class="dv">1</span>, figsize<span class="op">=</span>(<span class="dv">14</span>,<span class="dv">18</span>))</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>prices[<span class="st">'Adj Close'</span>].plot(kind<span class="op">=</span><span class="st">"line"</span>, ax<span class="op">=</span>ax1)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>ax1.set_title(<span class="st">"Preços Ajustados BBAS3"</span>)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>ax1.set_ylabel(<span class="st">"Preço"</span>)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>ax1.set_xlabel(<span class="st">"Ano"</span>)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>retornos_anuais.plot(kind<span class="op">=</span><span class="st">"line"</span>, ax<span class="op">=</span>ax2)</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>ax2.set_title(<span class="st">"Retornos Anuais BBAS3"</span>)</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>ax2.set_ylabel(<span class="st">"Preço"</span>)</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>ax2.set_xlabel(<span class="st">"Ano"</span>)</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="preços-retornos.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Comparação entre preço e retorno. Fonte: Yahoo! Finance. Elaboração: Lucas Souza Santos.</figcaption><p></p>
+</figure>
+</div>
+</section>
+<section id="estatísticas-dos-retornos-anuais" class="level3">
+<h3 class="anchored" data-anchor-id="estatísticas-dos-retornos-anuais">Estatísticas dos retornos anuais</h3>
+<div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Importamos mais as seguintes bibliotecas.</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> math</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> statistics <span class="im">as</span> st</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>retornos_anuais.describe()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>O resultado da função <code>describe()</code> será a tabela abaixo:</p>
+<table class="table">
+<thead>
+<tr class="header">
+<th>Métricas</th>
+<th>Valores</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Média</td>
+<td>0.164906</td>
+</tr>
+<tr class="even">
+<td>Desvio Padrão</td>
+<td>0.390533</td>
+</tr>
+<tr class="odd">
+<td>Mínimo</td>
+<td>-0.315050</td>
+</tr>
+<tr class="even">
+<td>25%</td>
+<td>-0.138700</td>
+</tr>
+<tr class="odd">
+<td>50%</td>
+<td>0.169748</td>
+</tr>
+<tr class="even">
+<td>75%</td>
+<td>0.269097</td>
+</tr>
+<tr class="odd">
+<td>Máximo</td>
+<td>0.994141</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Cenários otimista e pessimista para o ativo</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>média <span class="op">=</span> st.mean(retornos_anuais)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>desvio <span class="op">=</span> st.pstdev(retornos_anuais)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>otimista <span class="op">=</span> média<span class="op">+</span><span class="dv">2</span><span class="op">*</span>desvio<span class="op">/</span>math.sqrt(<span class="dv">10</span>)</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>pessimista <span class="op">=</span> média<span class="op">-</span><span class="dv">2</span><span class="op">*</span>desvio<span class="op">/</span>math.sqrt(<span class="dv">10</span>)</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Otimista: "</span>,otimista, <span class="st">"Pessimista: "</span>,pessimista)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><strong>Otimista:</strong> 0.39922543479982053 (39,92%) <strong>Pessimista:</strong> -0.06941435742563054 (6,94%)</p>
+</section>
+<section id="retornos-mensais" class="level3">
+<h3 class="anchored" data-anchor-id="retornos-mensais">Retornos Mensais</h3>
+<div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>retornos_mensais <span class="op">=</span> prices[<span class="st">'Adj Close'</span>].resample(<span class="st">'M'</span>).last().pct_change().dropna()</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>qs.extend_pandas()</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>retornos_mensais.plot_monthly_heatmap()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="RM-BB.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Mapa de calor dos retornos mensais do BBAS3 nos últimos 10 anos, desde 2013. Fonte: Yahoo! Finance. Elaboração: Lucas Souza Santos.</figcaption><p></p>
+</figure>
+</div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>retornos_mensais.plot.hist(bins<span class="op">=</span><span class="dv">50</span>, title<span class="op">=</span><span class="st">'Histograma dos retornos mensais'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="hist.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Histograma dos retornos mensais do BBAS3. Fonte: Yahoo! Finance. Elaboração: Lucas Souza Santos.</figcaption><p></p>
+</figure>
+</div>
+<p>Podemos notar com o histograma que os retornos mais frequentes estão entre -10% e mais 10%.</p>
+<p>Por fim, temos a plotagem das médias móveis do Ibovespa e BBAS3.</p>
+<p><img src="médias-móveis.png" class="img-fluid"></p>
+</section>
+</section>
+<section id="conclusão" class="level2">
+<h2 class="anchored" data-anchor-id="conclusão">Conclusão</h2>
+<p>Neste tutorial, aprendemos como calcular e analisar os retornos financeiros de ações e do índice Bovespa usando Python. Usamos o pacote Yfinance para baixar os dados, Pandas para calcular os retornos e o pacote Matplotlib para plotar e analisar os resultados. E que o <strong>retorno médio mensal</strong> do índice Ibovespa de <strong>0,76%</strong> foi menor do que o <strong>retorno médio mensal</strong> do banco do Brasil (BBAS3) de <strong>1,71%</strong>.</p>
+</section>
+<section id="referências" class="level1">
+<h1>Referências</h1>
+<p>CAETANO, M. A. L. Python e mercado financeiro. São Paulo: Editora Blucher, 2021. E-book. ISBN 9786555062410. Disponível em: <a href="https://integrada.minhabiblioteca.com.br/#/books/9786555062410/">https://integrada.minhabiblioteca.com.br/#/books/9786555062410/</a>. Acesso em: 25 jan. 2023.</p>
+<p><a href="https://youtu.be/JOqK2EGdxbQ">Como Calcular o Preço Ajustado (Dividendos, Splits) de uma Ação</a>. Canal: Ferramentas do Investidor.</p>
+<p>ROSS, S. A.; WESTERFIELD, R. W.; JAFFE, J.; et al.&nbsp;Administração financeira. Porto Alegre: Grupo A, 2015. 10. ed.&nbsp;E-book. ISBN 9788580554328. Disponível em: <a href="https://integrada.minhabiblioteca.com.br/books/9788580554328">https://integrada.minhabiblioteca.com.br/books/9788580554328</a>. Acesso em: 25 jan. 2023.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const disableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'prefetch';
+    }
+  }
+  const enableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'stylesheet';
+    }
+  }
+  const manageTransitions = (selector, allowTransitions) => {
+    const els = window.document.querySelectorAll(selector);
+    for (let i=0; i < els.length; i++) {
+      const el = els[i];
+      if (allowTransitions) {
+        el.classList.remove('notransition');
+      } else {
+        el.classList.add('notransition');
+      }
+    }
+  }
+  const toggleColorMode = (alternate) => {
+    // Switch the stylesheets
+    const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+    manageTransitions('#quarto-margin-sidebar .nav-link', false);
+    if (alternate) {
+      enableStylesheet(alternateStylesheets);
+      for (const sheetNode of alternateStylesheets) {
+        if (sheetNode.id === "quarto-bootstrap") {
+          toggleBodyColorMode(sheetNode);
+        }
+      }
+    } else {
+      disableStylesheet(alternateStylesheets);
+      toggleBodyColorPrimary();
+    }
+    manageTransitions('#quarto-margin-sidebar .nav-link', true);
+    // Switch the toggles
+    const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+    for (let i=0; i < toggles.length; i++) {
+      const toggle = toggles[i];
+      if (toggle) {
+        if (alternate) {
+          toggle.classList.add("alternate");     
+        } else {
+          toggle.classList.remove("alternate");
+        }
+      }
+    }
+    // Hack to workaround the fact that safari doesn't
+    // properly recolor the scrollbar when toggling (#1455)
+    if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+      manageTransitions("body", false);
+      window.scrollTo(0, 1);
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        manageTransitions("body", true);
+      }, 40);  
+    }
+  }
+  const isFileUrl = () => { 
+    return window.location.protocol === 'file:';
+  }
+  const hasAlternateSentinel = () => {  
+    let styleSentinel = getColorSchemeSentinel();
+    if (styleSentinel !== null) {
+      return styleSentinel === "alternate";
+    } else {
+      return false;
+    }
+  }
+  const setStyleSentinel = (alternate) => {
+    const value = alternate ? "alternate" : "default";
+    if (!isFileUrl()) {
+      window.localStorage.setItem("quarto-color-scheme", value);
+    } else {
+      localAlternateSentinel = value;
+    }
+  }
+  const getColorSchemeSentinel = () => {
+    if (!isFileUrl()) {
+      const storageValue = window.localStorage.getItem("quarto-color-scheme");
+      return storageValue != null ? storageValue : localAlternateSentinel;
+    } else {
+      return localAlternateSentinel;
+    }
+  }
+  let localAlternateSentinel = 'default';
+  // Dark / light mode switch
+  window.quartoToggleColorScheme = () => {
+    // Read the current dark / light value 
+    let toAlternate = !hasAlternateSentinel();
+    toggleColorMode(toAlternate);
+    setStyleSentinel(toAlternate);
+  };
+  // Ensure there is a toggle, if there isn't float one in the top right
+  if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+    const a = window.document.createElement('a');
+    a.classList.add('top-right');
+    a.classList.add('quarto-color-scheme-toggle');
+    a.href = "";
+    a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+    const i = window.document.createElement("i");
+    i.classList.add('bi');
+    a.appendChild(i);
+    window.document.body.appendChild(a);
+  }
+  // Switch to dark mode if need be
+  if (hasAlternateSentinel()) {
+    toggleColorMode(true);
+  } else {
+    toggleColorMode(false);
+  }
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<script src="https://utteranc.es/client.js" repo="LUCAS-01SANTOS/Comentarios-do-Blog" issue-term="pathname" theme="gruvbox-dark" crossorigin="anonymous" async="">
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">Copyright 2023, Lucas Souza Santos.</div>   
+    <div class="nav-footer-right">Este blog é construído com ❤️ e <a href="https://quarto.org/">Quarto</a>.</div>
+  </div>
+</footer>
+
+
+
+</body></html>
