@@ -1,0 +1,17 @@
+---
+title: "Meu Primeiro Blog Post"
+author: "Lucas Souza Santos"
+date: "2023-01-13"
+categories: [Notícia]
+image: "thumbnail.jpg"
+---
+
+Este é o primeiro post desse blog. Bem-vindo!😄
+
+![](thumbnail.jpg)
+
+O objetivo desse site pessoal/blog é servir como portfólio, para documentar para mim mesmo e compartilhar com todos o que tenho aprendido. Atualmente sou graduando em Administração pela UFPB, e pessoalmente gosto muito de programação, em Python principalmente.
+
+Por isso tenho buscado mesclar esses dois campus de conhecimento, aplicando a programação, mais especificamente a área de Data Science as minhas pesquisas e projetos na graduação. E sua aplicação ao mercado financeiro tem sido algo que tenho explorado mais.
+
+Então fique a vontadade para aproveitar esse espaço, comentar ou entar em contato.

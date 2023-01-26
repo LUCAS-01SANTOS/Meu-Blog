@@ -3,8 +3,10 @@ project:
 
 website:
   title: "Lucas Souza Santos"
+  favicon: favicon-site.png
   site-url: _quarto.yml
   description: "Blog pessoal"
+
   navbar:
     right:
       - href: about.qmd
@@ -15,25 +17,33 @@ website:
         href: https://github.com/LUCAS-01SANTOS
       - icon: rss
         href: index.xml
-    foreground: secondary
-    background: primary
+
   sidebar:
     style: "floating"
     search: true
     contents: auto
+
   page-footer:
     border: false
-    left: "Copyright 2023, Lucas Souza Santos" 
-    right:
-      - icon: linkedin
-        href: https://www.linkedin.com/in/lucas-souza-santos-709453165/
-      - icon: github
-        href: https://github.com/LUCAS-01SANTOS
+    left: "Copyright 2023, Lucas Souza Santos." 
+    right: "Este blog é construído com [Quarto](https://quarto.org/)."
+
+  comments: 
+    utterances:
+      repo: LUCAS-01SANTOS/Comentarios-do-Blog
+      theme: gruvbox-dark
+      issue-term: pathname
+      
 execute:
   freeze: auto
+
 format:
   html:
-    theme: lux
+    highlight-style: a11y-dark
+    theme:
+      light: flatly
+      dark: darkly
     css: styles.css
-
+    code-copy: true
+    code-overflow: wrap
 

@@ -10,48 +10,246 @@
 <atom:link href="_quarto.yml/index.xml" rel="self" type="application/rss+xml"/>
 <description>Blog pessoal</description>
 <generator>quarto-1.2.313</generator>
-<lastBuildDate>Tue, 10 Jan 2023 03:00:00 GMT</lastBuildDate>
+<lastBuildDate>Wed, 25 Jan 2023 03:00:00 GMT</lastBuildDate>
 <item>
-  <title>Post With Code</title>
-  <dc:creator>Harlow Malloc</dc:creator>
-  <link>_quarto.yml/posts/post-with-code/index.html</link>
+  <title>Análise de Retornos Financeiros de Ações e Ibovespa com Python</title>
+  <dc:creator>Lucas Souza Santos</dc:creator>
+  <link>_quarto.yml/posts/post-02/index.html</link>
   <description><![CDATA[ 
 
 
 
 
-<p>This is a post with executable code.</p>
+<section id="introdução" class="level2">
+<h2 class="anchored" data-anchor-id="introdução">Introdução</h2>
+<p>A análise de retornos financeiros é um dos principais meios de avaliar os resultados de investimentos em ações. Neste artigo, vamos aprender como calcular e analisar os retornos financeiros de ações e do índice Bovespa (IBOV) usando Python.</p>
+<p>No post de hoje, vamos realizar uma análise exploratória da série de retornos diários do Ibovespa utilizando o Python.</p>
+</section>
+<section id="metodologia" class="level2">
+<h2 class="anchored" data-anchor-id="metodologia">1. Metodologia</h2>
+<p>Um site popular que fornece preços diários de ações é o Yahoo! Finance. No entanto, se você usar os preços cotados neste site para calcular o retorno de uma ação, deverá ter o cuidado de usar as informações corretas. O Yahoo! Finance informa dois preços de fechamento de ações, o preço de fechamento real e o fechamento ajustado (Adj Close) <em>que é ajustado para desdobramentos de ações e dividendos</em>.</p>
+<p>Em um <strong>desdobramento de ações (os Splits)</strong>, o número de ações aumenta e o preço das ações diminui. Por exemplo, em um desdobramento de ações 2 por 1, o número de ações seria dobrado, pois os acionistas receberiam 2 ações para cada 1 ação que possuem atualmente, e o preço das ações seria reduzido pela metade.</p>
+<p>Suponha que uma ação esteja sendo negociada atualmente a $ 120 por ação e passe por um desdobramento de 2 para 1. Suponha também que o preço das ações permaneça inalterado durante o dia. O preço de fechamento no Yahoo! O setor financeiro reportaria <strong>preços de $ 120 e $ 60, respectivamente</strong>, o que parece uma queda de 50% no preço das ações. Na verdade, o retorno do acionista durante o dia foi zero porque, embora o preço das ações tenha caído pela metade, o número de ações que possuíam dobrou. <strong>Nesse caso, o preço de fechamento ajustado seria de US$ 60 para os dois dias.</strong></p>
+<p>O fechamento ajustado relatado no Yahoo! O setor financeiro também ajusta os dividendos. Considere uma ação que está sendo vendida por $ 100 no final de abril, paga um dividendo de $ 5 e tem um preço de $ 108 no final de maio. O retorno do acionista para esse período foi (US$ 108 - US$ 100 + 5) / US$ 100 = 13%. Nesse caso, o fechamento ajustado no final de maio seria de US$ 108, enquanto o fechamento ajustado do final de abril seria de US$ 95,581, o que representa um retorno de (US$ 108 - 95,581) / US$ 95,581 = 13%.</p>
+<p>É importante também frisar que <strong>os preços ajustados do Yahoo! não são exatos</strong>, pois o Yahoo! Finance relata o <em>ajuste próximo ao centavo mais próximo</em>. Esse arredondamento pode causar uma pequena diferença no cálculo do retorno. Considere o exemplo que usamos acima. Usando o preço ajustado de US$ 95,581, calcule você mesmo que o retorno é, na verdade, 12,99%, não 13%. <strong>Se você precisar de retornos totais, o fechamento ajustado fornecerá um cálculo de retorno bastante preciso e muito mais fácil</strong>, especialmente porque o Yahoo! finance não vai baixar preços e dividendos na mesma planilha. <em>No entanto, se você precisar de retornos de ganhos de capital e rendimentos de dividendos separadamente, ou retornos muito precisos, precisará usar o preço de fechamento e os dividendos, não o fechamento ajustado.</em></p>
+</section>
+<section id="preparando-o-ambiente" class="level2">
+<h2 class="anchored" data-anchor-id="preparando-o-ambiente">2. Preparando o ambiente</h2>
+<blockquote class="blockquote">
+<p>Todo o código foi executado utilizando o <strong><a href="https://colab.research.google.com/">Google Colab</a></strong>. (Gratuito e Online) Caso for executar localmente em sua máquina certifique-se de instalar todas as bibliotecas antes de importa-las.</p>
+</blockquote>
+<p>Instalação das bibliotecas necessárias:</p>
+<div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="op" style="color: #5E5E5E;">!</span>pip install <span class="op" style="color: #5E5E5E;">-</span>q yfinance</span>
+<span id="cb1-2"><span class="op" style="color: #5E5E5E;">!</span>pip install <span class="op" style="color: #5E5E5E;">-</span>q quantstats</span></code></pre></div>
+<p>Importação das bibliotecas utilizadas:</p>
+<div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="im" style="color: #00769E;">import</span> yfinance <span class="im" style="color: #00769E;">as</span> yf</span>
+<span id="cb2-2"><span class="im" style="color: #00769E;">import</span> pandas <span class="im" style="color: #00769E;">as</span> pd</span>
+<span id="cb2-3"><span class="im" style="color: #00769E;">import</span> numpy <span class="im" style="color: #00769E;">as</span> np</span>
+<span id="cb2-4"><span class="im" style="color: #00769E;">import</span> matplotlib.pyplot <span class="im" style="color: #00769E;">as</span> plt</span>
+<span id="cb2-5"><span class="im" style="color: #00769E;">import</span> quantstats <span class="im" style="color: #00769E;">as</span> qs</span></code></pre></div>
+</section>
+<section id="retornos-mensais-do-índice-bovespa" class="level2">
+<h2 class="anchored" data-anchor-id="retornos-mensais-do-índice-bovespa">3. Retornos mensais do Índice Bovespa</h2>
+<p>Primeiro, importamos os dados e criamos um DataFrame usando o Pandas. Em seguida, criamos um novo DataFrame com os retornos financeiros calculados.</p>
+<div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1">ticker_ibov <span class="op" style="color: #5E5E5E;">=</span> [<span class="st" style="color: #20794D;">'^BVSP'</span>]</span>
+<span id="cb3-2">periodo_ibov <span class="op" style="color: #5E5E5E;">=</span> <span class="st" style="color: #20794D;">'10y'</span>  <span class="co" style="color: #5E5E5E;"># Opções: 1d,5d,1mo,3mo,6mo,1y,2y,5y,10y,ytd,max</span></span></code></pre></div>
+<p>Inicialmente criamos a variável <code>ticker_ibov</code>, onde salvaremos o ticker do índice Bovespa. E a variável <code>periodo_ibov</code>, onde salvamos o período ou intervalo de tempo para coleta dos dados.</p>
+<div class="sourceCode" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1">ibov <span class="op" style="color: #5E5E5E;">=</span> yf.download(ticker_ibov, period<span class="op" style="color: #5E5E5E;">=</span>periodo_ibov, rounding<span class="op" style="color: #5E5E5E;">=</span><span class="va" style="color: #111111;">True</span> )[<span class="st" style="color: #20794D;">'Adj Close'</span>]</span>
+<span id="cb4-2">retornos_ibov <span class="op" style="color: #5E5E5E;">=</span> ibov.resample(<span class="st" style="color: #20794D;">'M'</span>).last().pct_change().dropna()</span>
+<span id="cb4-3">qs.extend_pandas()</span>
+<span id="cb4-4">retornos_ibov.plot_monthly_heatmap()</span></code></pre></div>
+<p>Em seguida, salvamos na variável <code>ibov</code> o conjunto de dados de Preços Ajustados (Adj Close).</p>
+<p>Com a função <code>resample()</code> do Pandas, que é um método de conveniência para conversão de frequência e reamostragem de séries temporais. Agruparemos os dados mês a mês. Usamos o <code>pct_change()</code> para obtermos o aumento percentual e o <code>dropna()</code> para limparmos as linhas as quais não possuem preço de fechamento. O dataframe tratado é salvo na variável <code>retornos-ibov</code>.</p>
+<p><strong>O cálculo:</strong> Para o <strong>retorno total utilizando o fechamento ajustado</strong> é bem simples, como segue,</p>
+<p><img src="_quarto.yml/posts/post-02/formula-retorno.png" class="img-fluid"></p>
+<p><em>Retorno Total = (Preço Final-Preço Inicial)/Preço Inicial</em></p>
+<p>ou</p>
+<p><em>Retorno Total = Preço Final/Preço Inicial-1</em></p>
+<p>E é exatamente esse calculo que é feito com a função <code>pct_change()</code>. Por fim, plotamos o nosso gráfico.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="_quarto.yml/posts/post-02/RM-ibov.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Mapa de calor dos retornos mensais do Ibovespa nos últimos 10 anos, desde 2013. Fonte: Yahoo! Finance. Elaboração: Lucas Souza Santos.</figcaption><p></p>
+</figure>
+</div>
+<p>Podemos identificar com o mapa acima que, o meses de março de 2016 e novembro de 2020 obtiveram os maiores retornos percentuais, já março de 2020 foi o mês com a maior baixa do índice, justificado pelo decreto da pandemia de Covid-19. O índice tem iniciado o mês de janeiro de 2023 no positivo, até o momento em que os dados foram coletados.</p>
+</section>
+<section id="análise-dos-retornos-do-bando-do-brasil" class="level2">
+<h2 class="anchored" data-anchor-id="análise-dos-retornos-do-bando-do-brasil">4. Análise dos retornos do Bando do Brasil</h2>
+<section id="obtenção-dos-dados" class="level3">
+<h3 class="anchored" data-anchor-id="obtenção-dos-dados"><strong>Obtenção dos Dados</strong></h3>
+<p>Aqui, repetimos o mesmo processo executado anteriormente com os dados do Ibovespa.</p>
+<div class="sourceCode" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1">tickers <span class="op" style="color: #5E5E5E;">=</span> [<span class="st" style="color: #20794D;">'BBAS3.SA'</span>,]</span>
+<span id="cb5-2">periodo <span class="op" style="color: #5E5E5E;">=</span> <span class="st" style="color: #20794D;">'10y'</span>  <span class="co" style="color: #5E5E5E;"># Opções: 1d,5d,1mo,3mo,6mo,1y,2y,5y,10y,ytd,max</span></span></code></pre></div>
+<div class="sourceCode" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1">prices <span class="op" style="color: #5E5E5E;">=</span> yf.download(tickers, period<span class="op" style="color: #5E5E5E;">=</span>periodo, rounding<span class="op" style="color: #5E5E5E;">=</span><span class="va" style="color: #111111;">True</span> )[[<span class="st" style="color: #20794D;">'Adj Close'</span>, <span class="st" style="color: #20794D;">'Volume'</span>]]</span>
+<span id="cb6-2">prices</span></code></pre></div>
+</section>
+<section id="preços" class="level3">
+<h3 class="anchored" data-anchor-id="preços">Preços</h3>
+<p>Ao executarmos a variável prices, notaremos que ela contém o seguinte DataFrame, o que já nos permite ter uma primeira visualização dos nossos dados. Aqui além dos preços, também temos a coluna com o volume.</p>
+<p><img src="_quarto.yml/posts/post-02/dataframe.png" style="width: 300px"></p>
+<p>Plotagem da série temporal de <code>prices</code>:</p>
+<div class="sourceCode" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1">prices[<span class="st" style="color: #20794D;">'Adj Close'</span>].plot(kind <span class="op" style="color: #5E5E5E;">=</span> <span class="st" style="color: #20794D;">'line'</span>, title<span class="op" style="color: #5E5E5E;">=</span><span class="st" style="color: #20794D;">'Preços Ajustados'</span>, xlabel<span class="op" style="color: #5E5E5E;">=</span><span class="st" style="color: #20794D;">'Data'</span>, ylabel<span class="op" style="color: #5E5E5E;">=</span><span class="st" style="color: #20794D;">'Preços'</span>)</span></code></pre></div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="_quarto.yml/posts/post-02/adj-close-BB.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Gráfico dos preços ajustados da BBAS3, últimos 10 anos. Fonte: Yahoo! Finance. Elaboração: Lucas Souza Santos.</figcaption><p></p>
+</figure>
+</div>
+<p>Podemos observar que os preço das ações do Banco do Brasil (BBAS3) tiveram um movimento de alta expressiva ao longo de 2019, seguida de uma queda também expressiva no início de 2020.</p>
+</section>
+<section id="retornos-anuais" class="level3">
+<h3 class="anchored" data-anchor-id="retornos-anuais">Retornos Anuais</h3>
+<div class="sourceCode" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1">retornos_anuais <span class="op" style="color: #5E5E5E;">=</span> prices[<span class="st" style="color: #20794D;">'Adj Close'</span>].resample(<span class="st" style="color: #20794D;">'Y'</span>).last().pct_change().dropna()</span>
+<span id="cb8-2">retornos_anuais.index <span class="op" style="color: #5E5E5E;">=</span> retornos_anuais.index.year</span>
+<span id="cb8-3">retornos_anuais.plot(kind <span class="op" style="color: #5E5E5E;">=</span> <span class="st" style="color: #20794D;">'barh'</span>, title<span class="op" style="color: #5E5E5E;">=</span><span class="st" style="color: #20794D;">'Retornos Anuais'</span>, xlabel<span class="op" style="color: #5E5E5E;">=</span><span class="st" style="color: #20794D;">'Data'</span>)</span></code></pre></div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="_quarto.yml/posts/post-02/retornos-anuais.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Retornos anuais BBAS3. Fonte: Yahoo! Finance. Elaboração: Lucas Souza Santos.</figcaption><p></p>
+</figure>
+</div>
+<p>Os anos em que houveram retornos negativos foram 2015, 2020, 2021. Sendo 2015 o ano com <strong>maior retorno negativo</strong> e 2016 o ano com <strong>maior retorno positivo</strong>.</p>
+<div class="sourceCode" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1">fig, (ax1, ax2) <span class="op" style="color: #5E5E5E;">=</span> plt.subplots(nrows<span class="op" style="color: #5E5E5E;">=</span><span class="dv" style="color: #AD0000;">2</span>, ncols<span class="op" style="color: #5E5E5E;">=</span><span class="dv" style="color: #AD0000;">1</span>, figsize<span class="op" style="color: #5E5E5E;">=</span>(<span class="dv" style="color: #AD0000;">14</span>,<span class="dv" style="color: #AD0000;">18</span>))</span>
+<span id="cb9-2"></span>
+<span id="cb9-3">prices[<span class="st" style="color: #20794D;">'Adj Close'</span>].plot(kind<span class="op" style="color: #5E5E5E;">=</span><span class="st" style="color: #20794D;">"line"</span>, ax<span class="op" style="color: #5E5E5E;">=</span>ax1)</span>
+<span id="cb9-4">ax1.set_title(<span class="st" style="color: #20794D;">"Preços Ajustados BBAS3"</span>)</span>
+<span id="cb9-5">ax1.set_ylabel(<span class="st" style="color: #20794D;">"Preço"</span>)</span>
+<span id="cb9-6">ax1.set_xlabel(<span class="st" style="color: #20794D;">"Ano"</span>)</span>
+<span id="cb9-7"></span>
+<span id="cb9-8">retornos_anuais.plot(kind<span class="op" style="color: #5E5E5E;">=</span><span class="st" style="color: #20794D;">"line"</span>, ax<span class="op" style="color: #5E5E5E;">=</span>ax2)</span>
+<span id="cb9-9">ax2.set_title(<span class="st" style="color: #20794D;">"Retornos Anuais BBAS3"</span>)</span>
+<span id="cb9-10">ax2.set_ylabel(<span class="st" style="color: #20794D;">"Preço"</span>)</span>
+<span id="cb9-11">ax2.set_xlabel(<span class="st" style="color: #20794D;">"Ano"</span>)</span>
+<span id="cb9-12"></span>
+<span id="cb9-13">plt.show()</span></code></pre></div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="_quarto.yml/posts/post-02/preços-retornos.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Comparação entre preço e retorno. Fonte: Yahoo! Finance. Elaboração: Lucas Souza Santos.</figcaption><p></p>
+</figure>
+</div>
+</section>
+<section id="estatísticas-dos-retornos-anuais" class="level3">
+<h3 class="anchored" data-anchor-id="estatísticas-dos-retornos-anuais">Estatísticas dos retornos anuais</h3>
+<div class="sourceCode" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><span class="co" style="color: #5E5E5E;"># Importamos mais as seguintes bibliotecas.</span></span>
+<span id="cb10-2"><span class="im" style="color: #00769E;">import</span> math</span>
+<span id="cb10-3"><span class="im" style="color: #00769E;">import</span> statistics <span class="im" style="color: #00769E;">as</span> st</span></code></pre></div>
+<div class="sourceCode" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1">retornos_anuais.describe()</span></code></pre></div>
+<p>O resultado da função <code>describe()</code> será a tabela abaixo:</p>
+<table class="table">
+<thead>
+<tr class="header">
+<th>Métricas</th>
+<th>Valores</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Média</td>
+<td>0.164906</td>
+</tr>
+<tr class="even">
+<td>Desvio Padrão</td>
+<td>0.390533</td>
+</tr>
+<tr class="odd">
+<td>Mínimo</td>
+<td>-0.315050</td>
+</tr>
+<tr class="even">
+<td>25%</td>
+<td>-0.138700</td>
+</tr>
+<tr class="odd">
+<td>50%</td>
+<td>0.169748</td>
+</tr>
+<tr class="even">
+<td>75%</td>
+<td>0.269097</td>
+</tr>
+<tr class="odd">
+<td>Máximo</td>
+<td>0.994141</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><span class="co" style="color: #5E5E5E;"># Cenários otimista e pessimista para o ativo</span></span>
+<span id="cb12-2">média <span class="op" style="color: #5E5E5E;">=</span> st.mean(retornos_anuais)</span>
+<span id="cb12-3">desvio <span class="op" style="color: #5E5E5E;">=</span> st.pstdev(retornos_anuais)</span>
+<span id="cb12-4">otimista <span class="op" style="color: #5E5E5E;">=</span> média<span class="op" style="color: #5E5E5E;">+</span><span class="dv" style="color: #AD0000;">2</span><span class="op" style="color: #5E5E5E;">*</span>desvio<span class="op" style="color: #5E5E5E;">/</span>math.sqrt(<span class="dv" style="color: #AD0000;">10</span>)</span>
+<span id="cb12-5">pessimista <span class="op" style="color: #5E5E5E;">=</span> média<span class="op" style="color: #5E5E5E;">-</span><span class="dv" style="color: #AD0000;">2</span><span class="op" style="color: #5E5E5E;">*</span>desvio<span class="op" style="color: #5E5E5E;">/</span>math.sqrt(<span class="dv" style="color: #AD0000;">10</span>)</span>
+<span id="cb12-6"></span>
+<span id="cb12-7"><span class="bu" style="color: null;">print</span>(<span class="st" style="color: #20794D;">"Otimista: "</span>,otimista, <span class="st" style="color: #20794D;">"Pessimista: "</span>,pessimista)</span></code></pre></div>
+<p><strong>Otimista:</strong> 0.39922543479982053 (39,92%) <strong>Pessimista:</strong> -0.06941435742563054 (6,94%)</p>
+</section>
+<section id="retornos-mensais" class="level3">
+<h3 class="anchored" data-anchor-id="retornos-mensais">Retornos Mensais</h3>
+<div class="sourceCode" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1">retornos_mensais <span class="op" style="color: #5E5E5E;">=</span> prices[<span class="st" style="color: #20794D;">'Adj Close'</span>].resample(<span class="st" style="color: #20794D;">'M'</span>).last().pct_change().dropna()</span>
+<span id="cb13-2">qs.extend_pandas()</span>
+<span id="cb13-3">retornos_mensais.plot_monthly_heatmap()</span></code></pre></div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="_quarto.yml/posts/post-02/RM-BB.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Mapa de calor dos retornos mensais do BBAS3 nos últimos 10 anos, desde 2013. Fonte: Yahoo! Finance. Elaboração: Lucas Souza Santos.</figcaption><p></p>
+</figure>
+</div>
+<div class="sourceCode" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1">retornos_mensais.plot.hist(bins<span class="op" style="color: #5E5E5E;">=</span><span class="dv" style="color: #AD0000;">50</span>, title<span class="op" style="color: #5E5E5E;">=</span><span class="st" style="color: #20794D;">'Histograma dos retornos mensais'</span>)</span></code></pre></div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="_quarto.yml/posts/post-02/hist.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Histograma dos retornos mensais do BBAS3. Fonte: Yahoo! Finance. Elaboração: Lucas Souza Santos.</figcaption><p></p>
+</figure>
+</div>
+<p>Podemos notar com o histograma que os retornos mais frequentes estão entre -10% e mais 10%.</p>
+<p>Por fim, temos a plotagem das médias móveis do Ibovespa e BBAS3.</p>
+<p><img src="_quarto.yml/posts/post-02/médias-móveis.png" class="img-fluid"></p>
+</section>
+</section>
+<section id="conclusão" class="level2">
+<h2 class="anchored" data-anchor-id="conclusão">Conclusão</h2>
+<p>Neste tutorial, aprendemos como calcular e analisar os retornos financeiros de ações e do índice Bovespa usando Python. Usamos o pacote Yfinance para baixar os dados, Pandas para calcular os retornos e o pacote Matplotlib para plotar e analisar os resultados. E que o <strong>retorno médio mensal</strong> do índice Ibovespa de <strong>0,76%</strong> foi menor do que o <strong>retorno médio mensal</strong> do banco do Brasil (BBAS3) de <strong>1,71%</strong>.</p>
+</section>
+<section id="referências" class="level1">
+<h1>Referências</h1>
+<p>CAETANO, M. A. L. Python e mercado financeiro. São Paulo: Editora Blucher, 2021. E-book. ISBN 9786555062410. Disponível em: <a href="https://integrada.minhabiblioteca.com.br/#/books/9786555062410/">https://integrada.minhabiblioteca.com.br/#/books/9786555062410/</a>. Acesso em: 25 jan. 2023.</p>
+<p><a href="https://youtu.be/JOqK2EGdxbQ">Como Calcular o Preço Ajustado (Dividendos, Splits) de uma Ação</a>. Canal: Ferramentas do Investidor.</p>
+<p>ROSS, S. A.; WESTERFIELD, R. W.; JAFFE, J.; et al.&nbsp;Administração financeira. Porto Alegre: Grupo A, 2015. 10. ed.&nbsp;E-book. ISBN 9788580554328. Disponível em: <a href="https://integrada.minhabiblioteca.com.br/books/9788580554328">https://integrada.minhabiblioteca.com.br/books/9788580554328</a>. Acesso em: 25 jan. 2023.</p>
 
 
+</section>
 
  ]]></description>
-  <category>news</category>
-  <category>code</category>
-  <category>analysis</category>
-  <guid>_quarto.yml/posts/post-with-code/index.html</guid>
-  <pubDate>Tue, 10 Jan 2023 03:00:00 GMT</pubDate>
-  <media:content url="_quarto.yml/posts/post-with-code/image.jpg" medium="image" type="image/jpeg"/>
+  <category>python</category>
+  <category>finanças</category>
+  <category>bolsa de valores</category>
+  <guid>_quarto.yml/posts/post-02/index.html</guid>
+  <pubDate>Wed, 25 Jan 2023 03:00:00 GMT</pubDate>
+  <media:content url="_quarto.yml/posts/post-02/python-for-finance.jpg" medium="image" type="image/jpeg"/>
 </item>
 <item>
-  <title>Welcome To My Blog</title>
-  <dc:creator>Tristan O&#39;Malley</dc:creator>
-  <link>_quarto.yml/posts/welcome/index.html</link>
+  <title>Meu Primeiro Blog Post</title>
+  <dc:creator>Lucas S. Santos</dc:creator>
+  <link>_quarto.yml/posts/post-01/index.html</link>
   <description><![CDATA[ 
 
 
 
 
-<p>This is the first post in a Quarto blog. Welcome!</p>
-<p><img src="_quarto.yml/posts/welcome/thumbnail.jpg" class="img-fluid"></p>
-<p>Since this post doesn’t specify an explicit <code>image</code>, the first image in the post will be used in the listing page of posts.</p>
+<p>Este é o primeiro post desse blog. Bem-vindo!😄</p>
+<p><img src="_quarto.yml/posts/post-01/thumbnail.jpg" class="img-fluid"></p>
+<p>O objetivo desse site pessoal/blog é servir como portfólio, para documentar para mim mesmo e compartilhar com todos o que tenho aprendido. Atualmente sou graduando em Administração pela UFPB, e pessoalmente gosto muito de programação, em Python principalmente.</p>
+<p>Por isso tenho buscado mesclar esses dois campus de conhecimento, aplicando a programação, mais especificamente a área de Data Science as minhas pesquisas e projetos na graduação. E sua aplicação ao mercado financeiro tem sido algo que tenho explorado mais.</p>
+<p>Então fique a vontadade para aproveitar esse espaço, comentar ou entar em contato.</p>
 
 
 
  ]]></description>
-  <category>news</category>
-  <guid>_quarto.yml/posts/welcome/index.html</guid>
-  <pubDate>Sat, 07 Jan 2023 03:00:00 GMT</pubDate>
-  <media:content url="_quarto.yml/posts/welcome/thumbnail.jpg" medium="image" type="image/jpeg"/>
+  <category>Notícia</category>
+  <guid>_quarto.yml/posts/post-01/index.html</guid>
+  <pubDate>Fri, 13 Jan 2023 03:00:00 GMT</pubDate>
+  <media:content url="_quarto.yml/posts/post-01/thumbnail.jpg" medium="image" type="image/jpeg"/>
 </item>
 </channel>
 </rss>
