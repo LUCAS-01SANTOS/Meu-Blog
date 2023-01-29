@@ -10,7 +10,160 @@
 <atom:link href="_quarto.yml/index.xml" rel="self" type="application/rss+xml"/>
 <description>Blog pessoal</description>
 <generator>quarto-1.2.313</generator>
-<lastBuildDate>Wed, 25 Jan 2023 03:00:00 GMT</lastBuildDate>
+<lastBuildDate>Sun, 29 Jan 2023 03:00:00 GMT</lastBuildDate>
+<item>
+  <title>Analisando Estatísticas do Ibovespa com Python</title>
+  <dc:creator>Lucas Souza Santos</dc:creator>
+  <link>_quarto.yml/posts/post-03/index.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<section id="analisando-estatísticas-do-ibovespa-com-python" class="level1">
+<h1>Analisando Estatísticas do Ibovespa com Python</h1>
+<section id="introdução" class="level2">
+<h2 class="anchored" data-anchor-id="introdução">Introdução</h2>
+<p>Neste post, vamos explorar como usar o Python para obter estatísticas sobre o Índice Bovespa (Ibovespa). Nós veremos como usar os dados históricos do Ibovespa para criar gráficos e calcular métricas como retorno.</p>
+<p>O objetivo é analisar o comportamento e a volatilidade do Ibovespa, observando seus retornos. Se os retornos diários para esse período se comportarem como uma distribuição normal ou gaussiana, estudos de riscos e probabilidades podem ser realizados adotando a hipótese da normalidade.</p>
+</section>
+<section id="obtendo-dados-do-ibovespa" class="level2">
+<h2 class="anchored" data-anchor-id="obtendo-dados-do-ibovespa">Obtendo Dados do Ibovespa</h2>
+<p>A primeira etapa é obter os dados históricos do Ibovespa. Esses dados podem ser baixados do site da B3 | Bovespa, mas nesse caso vamos fazer o download do Yahoo! Finance, através da biblioteca python <strong>yfinance</strong>.</p>
+<p>Como sempre gosto de fazer, vou utilizar o <a href="https://colab.research.google.com/">Google Colab</a> para fazer o código.</p>
+<div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="co" style="color: #5E5E5E;"># Instalção e importação do yfinance</span></span>
+<span id="cb1-2"><span class="op" style="color: #5E5E5E;">!</span>pip install yfinance <span class="op" style="color: #5E5E5E;">-</span>q</span>
+<span id="cb1-3"><span class="im" style="color: #00769E;">import</span> yfinance <span class="im" style="color: #00769E;">as</span> yf</span></code></pre></div>
+<div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="co" style="color: #5E5E5E;"># Para plotagem dos gráficos</span></span>
+<span id="cb2-2"><span class="im" style="color: #00769E;">import</span> matplotlib.pyplot <span class="im" style="color: #00769E;">as</span> plt</span>
+<span id="cb2-3"></span>
+<span id="cb2-4"><span class="co" style="color: #5E5E5E;"># Para as estatísticas</span></span>
+<span id="cb2-5"><span class="im" style="color: #00769E;">import</span> statistics <span class="im" style="color: #00769E;">as</span> st</span>
+<span id="cb2-6"><span class="im" style="color: #00769E;">import</span> numpy <span class="im" style="color: #00769E;">as</span> np</span>
+<span id="cb2-7"><span class="im" style="color: #00769E;">import</span> scipy.stats <span class="im" style="color: #00769E;">as</span> sci</span>
+<span id="cb2-8"><span class="im" style="color: #00769E;">from</span> scipy.stats <span class="im" style="color: #00769E;">import</span> norm</span></code></pre></div>
+</section>
+<section id="cálculo-dos-retornos" class="level2">
+<h2 class="anchored" data-anchor-id="cálculo-dos-retornos">Cálculo dos Retornos</h2>
+<p>Os dados de fechamento diário do Ibovespa foram adquiridos dos últimos 10 anos (29/01/2013 à 27/01/2023). A metodologia do calculo do retorno financeiro já está explicada no post anterior ****<a href="https://lucas-santos.netlify.app/posts/post-02/">Análise de Retornos Financeiros de Ações e Ibovespa com Python</a>****.</p>
+<p>Com os dados em mãos executamos as funções do Pandas <code>pct_change()</code> para calcular os retornos e <code>dropna()</code> para eliminar as linhas com calores nulos, ou seja, dias em que não houve negociação na Bolsa. Os retornos são salvos na variável <code>retornos_ibov</code>.</p>
+<div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1">retornos_ibov <span class="op" style="color: #5E5E5E;">=</span> ibov.pct_change().dropna()</span>
+<span id="cb3-2">retornos_ibov</span></code></pre></div>
+<p>O DataFrame com os retornos apresenta um total de 2478 dias de negociação.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="_quarto.yml/posts/post-03/retornos.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Exemplo da tabela com os retornos. Fonte: Yahoo! Finance. Elaboração: Lucas Souza Santos.</figcaption><p></p>
+</figure>
+</div>
+</section>
+<section id="visualizando-e-analisando-os-dados" class="level2">
+<h2 class="anchored" data-anchor-id="visualizando-e-analisando-os-dados">Visualizando e Analisando os Dados</h2>
+<p>Agora que temos os dados, podemos começar a explorá-los usando o Python. Vamos usar a biblioteca Pandas para ler os dados e a biblioteca Matplotlib para criar gráficos. Além das bibliotecas Numpy, Scipy.stats e Statistics, para as análises estatísticas e para que possamos plotar o histograma e o QQ-plot .</p>
+<section id="gráfico-ibovespa-diário" class="level3">
+<h3 class="anchored" data-anchor-id="gráfico-ibovespa-diário">Gráfico Ibovespa Diário</h3>
+<p>Gráfico de linhas com a série histórica dos preços de fechamento ajustado no índice Bovespa dos últimos 10 anos.</p>
+<div class="sourceCode" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1">plt.subplot()</span>
+<span id="cb4-2">ibov.plot(kind <span class="op" style="color: #5E5E5E;">=</span> <span class="st" style="color: #20794D;">'line'</span>, </span>
+<span id="cb4-3">          title<span class="op" style="color: #5E5E5E;">=</span><span class="st" style="color: #20794D;">'Ibovespa (dois anos)'</span>, </span>
+<span id="cb4-4">          xlabel<span class="op" style="color: #5E5E5E;">=</span><span class="st" style="color: #20794D;">'Data'</span>, </span>
+<span id="cb4-5">          ylabel<span class="op" style="color: #5E5E5E;">=</span><span class="st" style="color: #20794D;">'Ibovespa Diário'</span>, </span>
+<span id="cb4-6">          color<span class="op" style="color: #5E5E5E;">=</span><span class="st" style="color: #20794D;">'black'</span>,</span>
+<span id="cb4-7">          figsize<span class="op" style="color: #5E5E5E;">=</span>(<span class="dv" style="color: #AD0000;">12</span>,<span class="dv" style="color: #AD0000;">6</span>))</span></code></pre></div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="_quarto.yml/posts/post-03/g1.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Fonte: Yahoo! Finance. Elaboração: Lucas Souza Santos.</figcaption><p></p>
+</figure>
+</div>
+<p>Fonte: Yahoo! Finance. Elaboração: Lucas Souza Santos.</p>
+<p>Através desta série podemos ver a crescente alta no preço do Ibovespa entre 2016 e 2020, e sua grande baixa no início da pandemia em março de 2020. Seu atual preço hoje está na casa dos 1.800.</p>
+</section>
+<section id="gráfico-retornos-diários" class="level3">
+<h3 class="anchored" data-anchor-id="gráfico-retornos-diários">Gráfico Retornos Diários</h3>
+<div class="sourceCode" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1">plt.subplot()</span>
+<span id="cb5-2">retornos_ibov.plot(kind <span class="op" style="color: #5E5E5E;">=</span> <span class="st" style="color: #20794D;">'line'</span>, </span>
+<span id="cb5-3">          title<span class="op" style="color: #5E5E5E;">=</span><span class="st" style="color: #20794D;">'Ibovespa - Retorno Diário (dois anos)'</span>, </span>
+<span id="cb5-4">          xlabel<span class="op" style="color: #5E5E5E;">=</span><span class="st" style="color: #20794D;">'Data'</span>, </span>
+<span id="cb5-5">          ylabel<span class="op" style="color: #5E5E5E;">=</span><span class="st" style="color: #20794D;">'Ibovespa Diário'</span>, </span>
+<span id="cb5-6">          color<span class="op" style="color: #5E5E5E;">=</span><span class="st" style="color: #20794D;">'black'</span>,</span>
+<span id="cb5-7">          figsize<span class="op" style="color: #5E5E5E;">=</span>(<span class="dv" style="color: #AD0000;">12</span>,<span class="dv" style="color: #AD0000;">7</span>))</span></code></pre></div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="_quarto.yml/posts/post-03/g2.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Fonte: Yahoo! Finance. Elaboração: Lucas Souza Santos.</figcaption><p></p>
+</figure>
+</div>
+<p>Fonte: Yahoo! Finance. Elaboração: Lucas Souza Santos.</p>
+<p>Neste gráfico, é possível perceber o volume de oscilação dos retornos diários do Ibovespa. Podemos ver alguns dias com retornos positivos ou negativos mais altos, como alguns dias em 2014, 2016, 2017 e 2020.</p>
+</section>
+<section id="gráfico-histograma-e-distribuição-normal" class="level3">
+<h3 class="anchored" data-anchor-id="gráfico-histograma-e-distribuição-normal">Gráfico Histograma e Distribuição Normal</h3>
+<div class="sourceCode" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1">plt.subplot()</span>
+<span id="cb6-2">retornos_ibov.plot(kind <span class="op" style="color: #5E5E5E;">=</span> <span class="st" style="color: #20794D;">'hist'</span>, </span>
+<span id="cb6-3">                   bins<span class="op" style="color: #5E5E5E;">=</span><span class="dv" style="color: #AD0000;">50</span>, </span>
+<span id="cb6-4">                   density<span class="op" style="color: #5E5E5E;">=</span><span class="va" style="color: #111111;">True</span>, </span>
+<span id="cb6-5">                   title<span class="op" style="color: #5E5E5E;">=</span><span class="st" style="color: #20794D;">'Ibovespa - Histograma dos Retornos (dois anos)'</span>, </span>
+<span id="cb6-6">                   xlabel<span class="op" style="color: #5E5E5E;">=</span><span class="st" style="color: #20794D;">'Dias'</span>, </span>
+<span id="cb6-7">                   ylabel<span class="op" style="color: #5E5E5E;">=</span><span class="st" style="color: #20794D;">'Frequência'</span>, </span>
+<span id="cb6-8">                   color<span class="op" style="color: #5E5E5E;">=</span><span class="st" style="color: #20794D;">'blue'</span>, </span>
+<span id="cb6-9">                   grid<span class="op" style="color: #5E5E5E;">=</span><span class="va" style="color: #111111;">True</span>,</span>
+<span id="cb6-10">                   figsize<span class="op" style="color: #5E5E5E;">=</span>(<span class="dv" style="color: #AD0000;">12</span>,<span class="dv" style="color: #AD0000;">7</span>))</span>
+<span id="cb6-11"></span>
+<span id="cb6-12">xmin, xmax <span class="op" style="color: #5E5E5E;">=</span> plt.xlim()</span>
+<span id="cb6-13">média <span class="op" style="color: #5E5E5E;">=</span> st.mean(retornos_ibov)</span>
+<span id="cb6-14">desvio <span class="op" style="color: #5E5E5E;">=</span> st.pstdev(retornos_ibov)</span>
+<span id="cb6-15">eixo_x <span class="op" style="color: #5E5E5E;">=</span> np.linspace(xmin, xmax, <span class="dv" style="color: #AD0000;">100</span>)</span>
+<span id="cb6-16">eixo_y <span class="op" style="color: #5E5E5E;">=</span> norm.pdf(eixo_x, média, desvio)</span>
+<span id="cb6-17">plt.plot(eixo_x, eixo_y, color<span class="op" style="color: #5E5E5E;">=</span><span class="st" style="color: #20794D;">'black'</span>)</span></code></pre></div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="_quarto.yml/posts/post-03/g3.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Fonte: Yahoo! Finance. Elaboração: Lucas Souza Santos.</figcaption><p></p>
+</figure>
+</div>
+<p>Fonte: Yahoo! Finance. Elaboração: Lucas Souza Santos.</p>
+<p>Neste gráfico, podemos ver que os retornos estão concentrados em torno de 0 entre -0.05 e 0.05, o que sugere que a distribuição dos retornos do Ibovespa segue uma distribuição de probabilidade normal, porém não perfeitamente. A curva preta representa a distribuição normal, com média e desvio padrão calculados através das funções da biblioteca <code>statistics</code>. Foram utilizadas 50 classes (<code>bins=’50’</code>) para a representação desse histograma.</p>
+<p>A comprovação de que a distribuição dos retornos do Ibovespa segue uma distribuição de probabilidade normal, porém não perfeitamente aparece no próximo gráfico, o <code>QQ-plot</code>.</p>
+</section>
+<section id="gráfico-qq-plot" class="level3">
+<h3 class="anchored" data-anchor-id="gráfico-qq-plot">Gráfico QQ-plot</h3>
+<div class="sourceCode" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1">plt.subplot(title<span class="op" style="color: #5E5E5E;">=</span>(<span class="st" style="color: #20794D;">'QQ-plot Ibovespa'</span>), xlabel<span class="op" style="color: #5E5E5E;">=</span><span class="st" style="color: #20794D;">'Quantis teóricos'</span>, ylabel<span class="op" style="color: #5E5E5E;">=</span><span class="st" style="color: #20794D;">'Valores ordenados'</span>)</span>
+<span id="cb7-2">sci.probplot(retornos_ibov, dist<span class="op" style="color: #5E5E5E;">=</span><span class="st" style="color: #20794D;">'norm'</span>, plot<span class="op" style="color: #5E5E5E;">=</span>plt)</span>
+<span id="cb7-3">plt.show()</span></code></pre></div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="_quarto.yml/posts/post-03/g4.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Fonte: Yahoo! Finance. Elaboração: Lucas Souza Santos.</figcaption><p></p>
+</figure>
+</div>
+<p>Fonte: Yahoo! Finance. Elaboração: Lucas Souza Santos.</p>
+<p>O QQ-plot mostra que apesar da maioria dos pontos seguirem a linha da distribuição normal, existem alguns pontos fora da linha, o que indica que os retornos não são perfeitamente normais. Assim alguns dias tiveram retornos próximos a -15% e alguns próximos a 15%.</p>
+<p>Portanto, podemos chamar essa distribuição de “cauda gorda”, poi as classes do histograma são mais longas do que a previsão teórica da curva normal, fazendo os marcadores do gráfico destoarem da linha de 45º nos extremos.</p>
+</section>
+</section>
+<section id="conclusão" class="level2">
+<h2 class="anchored" data-anchor-id="conclusão">Conclusão</h2>
+<p>Neste post, vimos como usar o Python para analisar estatísticas do Ibovespa. Nós aprendemos como obter os dados, como visualizá-los usando o Matplotlib e como calcular métricas como retorno e volatilidade.</p>
+</section>
+<section id="referências" class="level2">
+<h2 class="anchored" data-anchor-id="referências">Referências</h2>
+<p>CAETANO, M. A. L.&nbsp;<strong>Python e Mercado Financeiro</strong>: programação para estudantes, investidores e analistas. São Paulo: Bluncher, 2011.</p>
+<p><a href="https://matplotlib.org/3.5.3/api/_as_gen/matplotlib.pyplot.hist.html">matplotlib.pyplot.hist — Documentação do Matplotlib 3.5.3</a></p>
+<p><a href="https://pandas.pydata.org/pandas-docs/version/0.23/generated/pandas.DataFrame.plot.html">Pandas. DataFrame.plot — documentação do pandas 0.23.1 (pydata.org)</a></p>
+
+
+</section>
+</section>
+
+ ]]></description>
+  <category>python</category>
+  <category>finanças</category>
+  <category>bolsa de valores</category>
+  <guid>_quarto.yml/posts/post-03/index.html</guid>
+  <pubDate>Sun, 29 Jan 2023 03:00:00 GMT</pubDate>
+  <media:content url="_quarto.yml/posts/post-03/B3.png" medium="image" type="image/png" height="83" width="144"/>
+</item>
 <item>
   <title>Análise de Retornos Financeiros de Ações e Ibovespa com Python</title>
   <dc:creator>Lucas Souza Santos</dc:creator>
@@ -230,7 +383,7 @@
 </item>
 <item>
   <title>Meu Primeiro Blog Post</title>
-  <dc:creator>Lucas S. Santos</dc:creator>
+  <dc:creator>Lucas Souza Santos</dc:creator>
   <link>_quarto.yml/posts/post-01/index.html</link>
   <description><![CDATA[ 
 
